@@ -2,16 +2,19 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:latest
+    image: mysql:8.0  # Avoid "latest" for production
     environment:
-      MYSQL_DATABASE: myn​ote
+      MYSQL_DATABASE: mynote
       MYSQL_USER: user
-      MYSQL_PASSWORD: myn​ote@123
+      MYSQL_PASSWORD: mynote@123
       MYSQL_ROOT_PASSWORD: admin@123
     volumes:
       - db_data:/var/lib/mysql
     ports:
       - "3306:3306"
+    restart: unless-stopped  # Auto-restart on failure
+    networks:
+      - app_network  # Isolate services in a custom network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -23,9 +26,13 @@ services:
       PMA_PASSWORD: admin@123
     ports:
       - "8081:80"
-
-
+    restart: unless-stopped
+    networks:
+      - app_network
 
 volumes:
-  db_data:
+  db_data:  # Persistent database storage
 
+networks:
+  app_network:  # Dedicated network for better isolation
+    driver: bridge
